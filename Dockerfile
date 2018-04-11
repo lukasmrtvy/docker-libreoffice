@@ -38,23 +38,30 @@ RUN apt-get install libkrb5-dev nasm
 RUN mkdir /tmp/libreoffice && curl -sSL https://github.com/LibreOffice/core/archive/libreoffice-6.0.0.3.tar.gz | tar xz -C  /tmp/libreoffice --strip-components=1
 WORKDIR /tmp/libreoffice
 RUN  echo "lo_sources_ver=6.0.0.3" > sources.ver
-RUN cat sources.ver
-RUN ./autogen.sh
+#RUN cat sources.ver
+UN ./autogen.sh
 RUN make
-RUN export MASTER=$(pwd)
 
 ####################################################################
 
-#FROM ubuntu:17.10 as libreoffice-online-builder
-RUN apt-get update && apt-get install libcppunit-dev libcppunit-doc pkg-config
-RUN mkdir /tmp/libreoffice-online && curl -sSL https://github.com/LibreOffice/online/archive/libreoffice-6.0.0.3.tar.gz | tar xz -C  /tmp/libreoffice-online --strip-components=1
-WORKDIR /tmp/libreoffice-online
-RUN ./configure --enable-silent-rules --with-lokit-path=${MASTER}/include --with-lo-path=${MASTER}/instdir --enable-debug --with-poco-includes=/opt/poco/include --with-poco-libs=/opt/poco/lib
-RUN ./autogen.sh
-RUN  make
+
 
 ###################################################################
-###################################################################
+
+
+#FROM ubuntu:17.10 as libreoffice-online-builder
+#RUN apt-get update && apt-get install -y libcppunit-dev libcppunit-doc pkg-config
+RUN mkdir /tmp/libreoffice-online && curl -sSL https://github.com/LibreOffice/online/archive/libreoffice-6.0.0.3.tar.gz | tar xz -C  /tmp/libreoffice-online --strip-components=1
+WORKDIR /tmp/libreoffice-online
+RUN sed -Ei 's/^# deb-src/deb-src/' /etc/apt/sources.list
+RUN apt-get install -y libpcap0.8 libpcap0.8-dev libcap-dev libtool m4 automake libcppunit-dev libcppunit-doc pkg-config 
+RUN apt-get install -y libcap-dev libcap-ng-dev libcap-ng-utils   libcap-ng0  libcap2 libcap2-bin
+RUN ./autogen.sh
+RUN ./configure --enable-silent-rules --with-lokit-path=${MASTER}/include --with-lo-path=${MASTER}/instdir --enable-debug --with-poco-includes=/opt/poco/include --with-poco-libs=/opt/poco/lib
+#RUN ./autogen.sh
+RUN  make
+
+
 
 #FROM ubuntu:17.10
 

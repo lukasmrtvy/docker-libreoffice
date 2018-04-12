@@ -39,7 +39,7 @@ RUN mkdir /tmp/libreoffice && curl -sSL https://github.com/LibreOffice/core/arch
 WORKDIR /tmp/libreoffice
 RUN  echo "lo_sources_ver=6.0.0.3" > sources.ver
 #RUN cat sources.ver
-UN ./autogen.sh
+RUN ./autogen.sh
 RUN make
 
 ####################################################################

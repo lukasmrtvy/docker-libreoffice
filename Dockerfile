@@ -28,9 +28,10 @@ RUN mkdir /tmp/libreoffice && curl -sSL https://github.com/LibreOffice/core/arch
 WORKDIR /tmp/libreoffice
 RUN  echo "lo_sources_ver=6.0.0.3" > sources.ver
 RUN ./autogen.sh
-RUN ./configure --prefix=/opt/libreoffice
-RUN make install -j $(getconf _NPROCESSORS_ONLN)
-
+RUN make
+#RUN ./configure --prefix=/opt/libreoffice
+#RUN make install -j $(getconf _NPROCESSORS_ONLN)
+RUN export MASTER=$(pwd)
 ####################################################################
 
 RUN apt-get update && apt-get install -y libcppunit-dev libcppunit-doc pkg-config
@@ -39,8 +40,9 @@ RUN mkdir /tmp/libreoffice-online && curl -sSL https://github.com/LibreOffice/on
 WORKDIR /tmp/libreoffice-online
 RUN apt-get update && apt install -y libcap2-bin libcap-dev
 RUN ./autogen.sh
-RUN ./configure --prefix=/opt/lool --enable-silent-rules --with-lokit-path=/opt/libreoffice/include --with-lo-path=/opt/libreoffice/instdir --enable-debug --with-poco-includes=/opt/poco/include --with-poco-libs=/opt/poco/lib --with-libpng-includes=/opt/libpng/include --with-libpng-libs=/opt/libpng/lib --with-max-connections=100000 --with-max-documents=100000
-RUN  make install -j $(getconf _NPROCESSORS_ONLN)
+RUN ./configure --prefix=/opt/lool --enable-silent-rules --with-lokit-path=${MASTER}/include --with-lo-path=${MASTER}/instdir --enable-debug --with-poco-includes=/opt/poco/include --with-poco-libs=/opt/poco/lib --with-libpng-includes=/opt/libpng/include --with-libpng-libs=/opt/libpng/lib --with-max-connections=100000 --with-max-documents=100000
+RUN make
+#RUN  make install -j $(getconf _NPROCESSORS_ONLN)
 
 ####################################################################
 

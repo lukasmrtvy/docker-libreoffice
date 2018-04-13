@@ -44,6 +44,8 @@ RUN  make install -j $(getconf _NPROCESSORS_ONLN)
 
 ####################################################################
 
+RUN sed -i  "s/<enable type=\"bool\" default=\"true\">true<\/enable>/<enable type=\"bool\" default=\"true\">false<\/enable>/g"  /etc/libreoffice/loolwsd.xml
+
 RUN setcap cap_fowner,cap_mknod,cap_sys_chroot=ep /usr/bin/loolforkit
 RUN setcap cap_sys_admin=ep /usr/bin/loolmount
 RUN adduser --quiet --system --group --home /opt/lool lool

@@ -8,7 +8,7 @@ ENV LO_VERSION 6.0.0.3
 ####################################################################
 
 RUN apt-get update && apt-get install -y build-essential  curl dpkg-dev devscripts zlib1g-dev checkinstall
-RUN mkdir /tmp/libpng && curl -sSL https://netcologne.dl.sourceforge.net/project/libpng/libpng12/${POCO_VERSION}/libpng-${POCO_VERSION}.tar.gz  | tar xz -C /tmp/libpng --strip-components=1
+RUN mkdir /tmp/libpng && curl -sSL https://netcologne.dl.sourceforge.net/project/libpng/libpng12/${LIBPNG_VERSION}/libpng-${LIBPNG_VERSION}.tar.gz  | tar xz -C /tmp/libpng --strip-components=1
 WORKDIR /tmp/libpng 
 RUN ./configure --prefix=/opt/libpng
 RUN make check
@@ -17,7 +17,7 @@ RUN make install -j $(getconf _NPROCESSORS_ONLN)
 ####################################################################
 
 RUN apt update && apt-get install -y libssl-dev openssl
-RUN mkdir -p /tmp/poco && curl -sSL https://pocoproject.org/releases/poco-${LIBPNG_VERSION}/poco-${LIBPNG_VERSION}-all.tar.gz | tar xz -C /tmp/poco  --strip-components=1
+RUN mkdir -p /tmp/poco && curl -sSL https://pocoproject.org/releases/poco-${POCO_VERSION}/poco-${POCO_VERSION}-all.tar.gz | tar xz -C /tmp/poco  --strip-components=1
 WORKDIR /tmp/poco
 RUN ./configure --prefix=/opt/poco
 RUN make -s install -j $(getconf _NPROCESSORS_ONLN)

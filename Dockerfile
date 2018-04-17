@@ -98,4 +98,6 @@ RUN loolwsd-systemplate-setup /opt/lool/systemplate /opt/libreoffice/
 
 USER lool
 
+EXPOSE 9980
+
 ENTRYPOINT /usr/bin/loolwsd --version --o:sys_template_path=/opt/lool/systemplate --o:lo_template_path=/opt/libreoffice --o::child_root_path=/opt/lool/child-roots --o:file_server_root_path=/usr/share/libreoffice-online

@@ -21,20 +21,24 @@ RUN make -s install -j $(getconf _NPROCESSORS_ONLN)
 
 RUN apt-get install -y gstreamer1.0-libav libkrb5-dev nasm graphviz ccache
 
+
 RUN sed -Ei 's/^# deb-src/deb-src/' /etc/apt/sources.list
 RUN apt-get update && apt-get build-dep -y libreoffice
 RUN apt-get install libkrb5-dev nasm
 RUN mkdir /tmp/libreoffice && curl -sSL https://github.com/LibreOffice/core/archive/libreoffice-6.0.0.3.tar.gz | tar xz -C  /tmp/libreoffice --strip-components=1
 WORKDIR /tmp/libreoffice
 RUN  echo "lo_sources_ver=6.0.0.3" > sources.ver
+COPY autogen.input /tmp/libreoffice/
+RUN apt install -y uuid-runtime # uuidgen
+COPY make.fetch.patch /tmp/libreoffice/
+RUN patch < make.fetch.patch
+RUN rm -rf /tmp/libreoffice/dictionaries /tmp/libreoffice/translations
 RUN ./autogen.sh
-RUN make
-
-RUN cp -R /tmp/libreoffice/instdir/. /opt/libreoffice/
+RUN make -j $(getconf _NPROCESSORS_ONLN)
 
 ###################################################################
 
-RUN apt-get update && apt-get install -y libcppunit-dev libcppunit-doc pkg-config sudo cpio
+RUN apt-get update && apt-get install -y libcppunit-dev libcppunit-doc pkg-config sudo cpio 
 RUN apt-get update && apt install -y  libtool m4 automake 
 RUN mkdir /tmp/libreoffice-online && curl -sSL https://github.com/LibreOffice/online/archive/libreoffice-6.0.0.3.tar.gz | tar xz -C  /tmp/libreoffice-online --strip-components=1
 WORKDIR /tmp/libreoffice-online
@@ -42,8 +46,18 @@ RUN apt-get update && apt install -y libcap2-bin libcap-dev
 RUN apt install -y npm python-polib node-jake
 RUN ./autogen.sh
 RUN ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-silent-rules --with-lokit-path=/tmp/libreoffice/include --with-lo-path=/tmp/libreoffice/instdir --enable-debug --with-poco-includes=/opt/poco/include --with-poco-libs=/opt/poco/lib --with-libpng-includes=/opt/libpng/include --with-libpng-libs=/opt/libpng/lib --with-max-connections=100000 --with-max-documents=100000
+
 RUN make -j $(getconf _NPROCESSORS_ONLN)
-RUN DESTDIR=/opt/lool/  make install -j $(getconf _NPROCESSORS_ONLN)
+RUN make install -j $(getconf _NPROCESSORS_ONLN)
+
+RUN echo a
+
+RUN ls -lha /usr/share/libreoffice-online
+RUN ls -lha /etc/libreoffice-online
+#RUN find / -iname "*lool*"
+RUN ls -lha /var/cache
+
+RUN ls -lha /tmp/libreoffice/instdir
 
 ####################################################################
 
@@ -51,6 +65,8 @@ RUN DESTDIR=/opt/lool/  make install -j $(getconf _NPROCESSORS_ONLN)
 
 #COPY --from=builder /usr/lool /usr/
 
+
+#RUN ls -lha /tmp/libreoffice-online
 
 RUN sed -i  "s/<enable type=\"bool\" default=\"true\">true<\/enable>/<enable type=\"bool\" default=\"true\">false<\/enable>/g"  /etc/libreoffice-online/loolwsd.xml
 
@@ -63,15 +79,22 @@ RUN rm -rf /opt/lool
 RUN mkdir -p /opt/lool/child-roots
 RUN ls -lha /tmp/libreoffice-online
 RUN cp -R /tmp/libreoffice-online/systemplate/ /opt/lool/
-
+RUN cp -R /tmp/libreoffice/instdir/. /opt/libreoffice/
 RUN chown lool: /opt/lool
 RUN chown lool: /opt/lool/child-roots
-# https://github.com/LibreOffice/online/blob/master/debian/loolwsd.postinst.in#L15
-RUN fc-cache /opt/libreoffice/share/fonts/truetype
+#WORKDIR /tmp/libreoffice-online/
+#RUN su lool --shell=/bin/sh -c "./loolwsd-systemplate-setup /opt/lool/systemplate /tmp/libreoffice"
+#RUN loolwsd-systemplate-setup /tmp/libreoffice-online/systemplate /tmp/libreoffice
+#RUN find / -iname "*systemplate*"
 RUN loolwsd-systemplate-setup /opt/lool/systemplate /opt/libreoffice/
 
 
+#RUN touch /var/log/loolwsd.log
+#RUN chown lool /var/log/loolwsd.log
 
+#RUN echo a
+
+#RUN ls -lha /tmp/libreoffice-online
 
 USER lool
 

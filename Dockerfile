@@ -40,44 +40,10 @@ RUN rm -rf /tmp/libreoffice/dictionaries /tmp/libreoffice/translations
 RUN ./autogen.sh
 RUN make -j $(getconf _NPROCESSORS_ONLN)
 
-
-
-##################################################################
-
-RUN mkdir -p /opt/libreoffice
-RUN cp -a /tmp/libreoffice/instdir /opt/libreoffice
-
-
-RUN mkdir -p /usr/share/hunspell
-RUN mkdir -p /usr/share/hyphen
-RUN mkdir -p /opt/lool/systemplate/usr/share/hyphen
-RUN mkdir -p /usr/share/mythes
-
-
-
-RUN for i in `find /tmp/libreoffice/instdir/share/extensions/ -name hyph*.dic`;do cp -a $i /opt/lool/systemplate/usr/share/hyphen;done
-RUN for i in `find /tmp/libreoffice/instdir/share/extensions/ -name hyph*.dic`;do cp -a $i /usr/share/hyphen;done
-RUN cp -a /tmp/libreoffice/instdir/share/extensions/dict-en/en_US.* /usr/share/hunspell
-RUN cp -a /tmp/libreoffice/instdir/share/extensions/dict-en/en_GB.* /usr/share/hunspell
-RUN cp -a /tmp/libreoffice/instdir/share/extensions/dict-it/it_IT.* /usr/share/hunspell
-RUN cp -a /tmp/libreoffice/instdir/share/extensions/dict-nl/nl_NL.* /usr/share/hunspell
-RUN cp -a /tmp/libreoffice/instdir/share/extensions/dict-pl/pl_PL.* /usr/share/hunspell
-RUN cp -a /tmp/libreoffice/instdir/share/extensions/dict-ru/ru_RU.* /usr/share/hunspell
-RUN cp -a /tmp/libreoffice/instdir/share/extensions/dict-pt-BR/pt_BR.* /usr/share/hunspell
-RUN cp -a /tmp/libreoffice/instdir/share/extensions/dict-pt-PT/pt_PT.* /usr/share/hunspell
-RUN cp -a /tmp/libreoffice/instdir/share/extensions/dict-fr/fr.dic /usr/share/hunspell/fr_FR.dic
-RUN cp -a /tmp/libreoffice/instdir/share/extensions/dict-fr/fr.aff /usr/share/hunspell/fr_FR.aff
-RUN cp -a /tmp/libreoffice/instdir/share/extensions/dict-es/es_ANY.dic /usr/share/hunspell/es_ES.dic
-RUN cp -a /tmp/libreoffice/instdir/share/extensions/dict-es/es_ANY.aff /usr/share/hunspell/es_ES.aff
-RUN cp -a /tmp/libreoffice/instdir/share/extensions/dict-de/de_AT_frami.dic /usr/share/hunspell/de_AT.dic
-RUN cp -a /tmp/libreoffice/instdir/share/extensions/dict-de/de_AT_frami.aff /usr/share/hunspell/de_AT.aff
-RUN cp -a /tmp/libreoffice/instdir/share/extensions/dict-de/de_CH_frami.dic /usr/share/hunspell/de_CH.dic
-RUN cp -a /tmp/libreoffice/instdir/share/extensions/dict-de/de_CH_frami.aff /usr/share/hunspell/de_CH.aff
-RUN cp -a /tmp/libreoffice/instdir/share/extensions/dict-de/de_DE_frami.dic /usr/share/hunspell/de_DE.dic
-RUN cp -a /tmp/libreoffice/instdir/share/extensions/dict-de/de_DE_frami.aff /usr/share/hunspell/de_DE.aff
-RUN for i in de en fr it pl pt-PT ru;do cp -a /tmp/libreoffice/instdir/share/extensions/dict-$i/th_* /usr/share/mythes;done
-
 ###################################################################
+
+#FROM ubuntu:17.10
+#COPY --from=builder /tmp/libreoffice/instdir/ /opt/libreoffice/
 
 RUN apt-get update && apt-get install -y libcppunit-dev libcppunit-doc pkg-config sudo cpio 
 RUN apt-get update && apt install -y  libtool m4 automake 
@@ -91,30 +57,14 @@ RUN ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-si
 ####################################################################
 
 RUN apt install -y wget translate-toolkit
-
 RUN scripts/downloadpootle.sh
-RUN cd loleaflet && make l10n
-
-RUN scripts/locorestrings.py /tmp/libreoffice-online/ /tmp/libreoffice/translations
-RUN scripts/unocommands.py --update /tmp/libreoffice-online /tmp/libreoffice/libreoffice
-RUN scripts/unocommands.py --translate /tmp/libreoffice-online /tmp/libreoffice/libreoffice/translations
 
 ####################################################################
-
 
 RUN make -j $(getconf _NPROCESSORS_ONLN)
 RUN make install -j $(getconf _NPROCESSORS_ONLN)
 
-
 ####################################################################
-
-#FROM ubuntu:17.10
-
-#COPY --from=builder  /usr/share/hunspell/ /usr/share/hunspell/
-#COPY --from=builder/usr/share/hyphen /usr/share/hyphen
-#COPY --from=builder /opt/lool/systemplate/usr/share/hyphen /opt/lool/systemplate/usr/share/hyphen
-#COPY --from=builder /usr/share/mythes /usr/share/mythes
-#COPY --from=builder /tmp/libreoffice/instdir/ /opt/libreoffice/
 
 
 RUN sed -i  "s/<enable type=\"bool\" default=\"true\">true<\/enable>/<enable type=\"bool\" default=\"true\">false<\/enable>/g"  /etc/libreoffice-online/loolwsd.xml
@@ -138,4 +88,4 @@ USER lool
 
 EXPOSE 9980
 
-ENTRYPOINT /usr/bin/loolwsd --version --o:sys_template_path=/opt/lool/systemplate --o:lo_template_path=/opt/libreoffice --o::child_root_path=/opt/lool/child-roots --o:file_server_root_path=/usr/share/libreoffice-online
+ENTRYPOINT /usr/bin/loolwsd --version --o:sys_template_path=/opt/lool/systemplate --o:lo_template_path=/opt/libreoffice --o:child_root_path=/opt/lool/child-roots --o:file_server_root_path=/usr/share/libreoffice-online

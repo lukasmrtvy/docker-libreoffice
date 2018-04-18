@@ -2,8 +2,8 @@
 
 FROM ubuntu:17.10 as builder
 
-ENV POCO_VERSION 1.2.59
-ENV LIBPNG_VERSION 1.9.0
+ENV POCO_VERSION 1.9.0
+ENV LIBPNG_VERSION 1.2.59
 ENV LO_VERSION 6.0.3.2
 
 RUN apt-get update && apt-get install -y build-essential  curl dpkg-dev devscripts zlib1g-dev checkinstall

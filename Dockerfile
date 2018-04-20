@@ -76,16 +76,20 @@ RUN mkdir -p /var/cache/libreoffice-online && chown lool: /var/cache/libreoffice
 RUN rm -rf /var/cache/libreoffice-online/*
 RUN rm -rf /opt/lool
 RUN mkdir -p /opt/lool/child-roots
-RUN ls -lha /tmp/libreoffice-online
+
+# use COPY instead
+
 RUN cp -R /tmp/libreoffice-online/systemplate/ /opt/lool/
 RUN cp -R /tmp/libreoffice/instdir/. /opt/libreoffice/
+
 RUN chown lool: /opt/lool
 RUN chown lool: /opt/lool/child-roots
 
 RUN loolwsd-systemplate-setup /opt/lool/systemplate /opt/libreoffice/
+RUN fc-cache /opt/libreoffice/share/fonts/truetype
 
 USER lool
 
 EXPOSE 9980
 
-ENTRYPOINT /usr/bin/loolwsd --version --o:sys_template_path=/opt/lool/systemplate --o:lo_template_path=/opt/libreoffice --o:child_root_path=/opt/lool/child-roots --o:file_server_root_path=/usr/share/libreoffice-online
+ENTRYPOINT /usr/bin/loolwsd --version --o:sys_template_path=/opt/lool/systemplate --o:lo_template_path=/opt/libreoffice --o:child_root_path=/opt/lool/child-roots --o:file_server_root_path=/usr/share/libreoffice-online --o:logging.level=trace --o:storage.filesystem[@allow]=true --o:admin_console.username=admin --o:admin_console.password=admin

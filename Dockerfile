@@ -1,6 +1,6 @@
 ####################################################################
 
-FROM ubuntu:17.10 as builder
+FROM ubuntu:18.04 as builder
 
 ENV POCO_VERSION 1.9.0
 ENV LIBPNG_VERSION 1.2.59
